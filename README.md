@@ -84,10 +84,17 @@ syntaxes/*
 
 src/extension.ts
 src/features/rstDocumentSymbolProvider.ts
+
+res/*
+
 ```
 
 # Thanks To
 
 Trond Snekvik's "reStructuredText Syntax highlighting" Extension which inspired me.
+
+# Notes for other VsCode distros Users
+
+.vsix is shipped with the sources codes on github, if you are using this in ohter vscode distros (say Code-OSS or Codium), you could download the vsix and install it directly.
 
 **Enjoy!**
