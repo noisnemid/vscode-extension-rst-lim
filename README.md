@@ -104,7 +104,7 @@ res/*
 
 # Thinking or Discussion
 
-At the beginning, I was thinking to add features of `Jump between refs` and `Peek images, refs, links, etc.`, but now I don't think so any more. I think, it's better to keep it light-weighted.
+Initially, I considered adding features to jump between refs and peek at images, refs, links, etc., but I no longer plan to do so. I think it's better to keep this extension lightweight.
 
 # Thanks To
 
