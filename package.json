@@ -2,76 +2,71 @@
   "name": "rst-lim",
   "displayName": "rst-lim",
   "description": "rst-lim = reStructuredText, Less is More!",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "publisher": "CeresNorthPole",
-  "icon":"res/rst-lim-icon.png",
+  "icon": "res/rst-lim-icon.png",
   "engines": {
-    "vscode": "^1.72.0"
+    "vscode": "^1.140.0"
   },
   "categories": [
     "Programming Languages"
   ],
   "repository": {
-    "url": "https://github.com/noisnemid/vscode-extension-remote-scroll"
+    "url": "https://github.com/noisnemid/vscode-extension-rst-lim.git"
   },
   "activationEvents": [
     "workspaceContains:**/*.rst",
     "onLanguage:restructuredtext"
   ],
-  "main": "./dist/extension.js",
+  "main": "./out/extension.js",
   "contributes": {
     "languages": [
-        {
-          "id": "restructuredtext",
-          "aliases": [
-            "reStructuredText",
-            "restructuredtext",
-            "ReStructured Text",
-            "reStructured Text",
-            "RST",
-            "ReST",
-            "reST"
-          ],
-          "extensions": [
-            ".rst",
-            ".rest"
-          ],
-          "configuration": "./syntaxes/rst-configuration.json"
-        }
-      ],
-      "grammars": [
-        {
-          "language": "restructuredtext",
-          "scopeName": "text.restructuredtext",
-          "path": "./syntaxes/rst.tmLanguage.json"
-        }
-      ]
+      {
+        "id": "restructuredtext",
+        "aliases": [
+          "reStructuredText",
+          "restructuredtext",
+          "ReStructured Text",
+          "reStructured Text",
+          "RST",
+          "ReST",
+          "reST"
+        ],
+        "extensions": [
+          ".rst",
+          ".rest"
+        ],
+        "configuration": "./syntaxes/rst-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "restructuredtext",
+        "scopeName": "text.restructuredtext",
+        "path": "./syntaxes/rst.tmLanguage.json"
+      }
+    ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run package",
-    "compile": "webpack",
-    "watch": "webpack --watch",
-    "package": "webpack --mode production --devtool hidden-source-map",
-    "compile-tests": "tsc -p . --outDir out",
-    "watch-tests": "tsc -p . -w --outDir out",
-    "pretest": "npm run compile-tests && npm run compile && npm run lint",
-    "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.72.0",
-    "@types/glob": "^8.0.0",
-    "@types/mocha": "^10.0.0",
-    "@types/node": "16.x",
-    "@typescript-eslint/eslint-plugin": "^5.38.1",
-    "@typescript-eslint/parser": "^5.38.1",
-    "eslint": "^8.24.0",
-    "glob": "^8.0.3",
-    "mocha": "^10.0.0",
-    "typescript": "^4.8.4",
-    "ts-loader": "^9.4.1",
-    "webpack": "^5.74.0",
-    "webpack-cli": "^4.10.0",
-    "@vscode/test-electron": "^2.1.5"
+    "@types/vscode": "^1.140.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "24.x",
+    "typescript-eslint": "^8.61.1",
+    "eslint": "^10.5.0",
+    "typescript": "^6.0.3",
+    "@vscode/test-cli": "^0.0.15",
+    "@vscode/test-electron": "^3.0.0"
+  },
+  "overrides": {
+    "diff": "^8.0.4",
+    "serialize-javascript": "^7.0.6"
   }
 }

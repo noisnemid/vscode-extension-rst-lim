@@ -2,7 +2,7 @@
 
 rst-lim = reStructuredText-Less-is-More!
 
-rST(reStructuredText exension designed following the thought of Less is More!
+rST (reStructuredText) exension designed following the thought of Less is More!
 
 Clean, clear, and light-weight supports for resStructuredText language, Not any active/intrusive modifications to the texts -- these should be left to the writers themselves.
 
@@ -10,25 +10,26 @@ Clean, clear, and light-weight supports for resStructuredText language, Not any 
 
 1.  Very fundamental reStructuredText language definition to activate the snippets working.
 2.  Outline support.
-3.  Code-block directive higlight support.
+3.  Code-block directive highlight support.
 4.  Inline auto-close pairs support.
 
-## Some Common Features TODO
-
-1.  Revers-location to Outline Items when clicking a Title.
-
 ## Tips
+
+You might need to manually toggle `Follow Cursor` to `√` under the `Outline` View's `More Actions` Menu (`...`) .
 
 It's recommended to use Fabio Spampinato's VsCode-Highlight Extension to make explicit highlight plans, which means you could directly control and override any other highlight styles such as giving the control rights to a indirect color-theme rendering.
 
 Here are some examples for rST:
 
-```
-    "highlight.regexes": {
-    "([\\t ]+$)": {
+```json
+"highlight.regexes":
+{
+    "([\\t ]+$)":
+    {
         "memo": "wrong ending spaces",
         "filterFileRegex": ".*\\.rst$",
-        "decorations": [
+        "decorations":
+        [
             {
                 "backgroundColor": "yellow",
                 "border": "1px solid red",
@@ -61,22 +62,35 @@ And during that, you just need to concentrate on your writing.
 
 ## Release Notes
 
-1.0.4 Update the VsCode Engine Version and Dependencies' versions, and Publish to Extension Market
+### 1.0.5
 
-1.0.3 auto-close pairs *
+1.Renew headline regex pattern so that themes could render the whole headline texts (text line and the marks lines).
+2.Reverse-location to Outline Items when clicking a Title.
+3.Some typos in README fixed.
 
-1.0.2 headline fix
+### 1.0.4
 
-1.0. basic implementation
+Update the VsCode Engine Version and Dependencies' versions, and Publish to Extension Market.
 
+### 1.0.3
+
+Auto-close pairs `*` .
+
+### 1.0.2
+
+Headline fix.
+
+### 1.0
+
+An initial implementation.
 
 # Modification Guidance
 
 Files involved to edit or change:
 
-in the extension prject folder:
+in the extension project folder:
 
-```
+```txt
 package.json
 tsconfig.json: compilerOptions:strict:false
 
@@ -86,8 +100,11 @@ src/extension.ts
 src/features/rstDocumentSymbolProvider.ts
 
 res/*
-
 ```
+
+# Thinking or Discussion
+
+At the beginning, I was thinking to add features of `Jump between refs` and `Peek images, refs, links, etc.`, but now I don't think so any more. I think, it's better to keep it light-weighted.
 
 # Thanks To
 

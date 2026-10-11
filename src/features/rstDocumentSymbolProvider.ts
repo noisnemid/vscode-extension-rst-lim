@@ -2,19 +2,21 @@ import * as vscode from "vscode";
 // import { rejects } from "assert";
 // import { InsertTextFormat } from 'vscode-languageclient';
 // import { NONAME } from "dns";
-console.log('loaded rst symbol provider!!!')
+console.log('loaded rst symbol provider!!!');
+
+interface Info {
+  isTitle: boolean;
+  jump: number;
+  line: vscode.TextLine | null;
+  mark: string;
+}
+
 export class rstDocumentSymbolProvider
   implements vscode.DocumentSymbolProvider {
-  private titleEval(document: vscode.TextDocument, i: number): Object {
+  private titleEval(document: vscode.TextDocument, i: number): Info {
     const titleRx: RegExp = /^(=|-|~|`|#|"|\^|\+|\*|:|\.|'|_|\+)\1{3,}$/;
     const blankRx: RegExp = /^\s*$/;
 
-    interface Info {
-      isTitle: boolean;
-      jump: number;
-      line: vscode.TextLine | null;
-      mark: String;
-    }
     let l1 = document.lineAt(i);
     let l2 = document.lineAt(i + 1);
 
@@ -34,7 +36,7 @@ export class rstDocumentSymbolProvider
         isTitle: true,
         jump: 2,
         line: l1,
-        mark: l2.text.substr(0, 1) + "U", // underline styled title
+        mark: l2.text.slice(0, 1) + "U", // underline styled title
       };
     } else if (
       i < document.lineCount - 2 &&
@@ -47,7 +49,7 @@ export class rstDocumentSymbolProvider
         isTitle: true,
         jump: 3,
         line: l2,
-        mark: l1.text.substr(0, 1) + "OU", // overline+underline styled title
+        mark: l1.text.slice(0, 1) + "OU", // overline+underline styled title
       };
     }
 
@@ -58,53 +60,81 @@ export class rstDocumentSymbolProvider
     document: vscode.TextDocument,
     token: vscode.CancellationToken
   ): Thenable<vscode.DocumentSymbol[]> {
-    return new Promise((resolve, reject) => {
-      let symbols: Array<vscode.DocumentSymbol> = [];
-      let nodes: any = [
-        [symbols, 0],
-        [, 1],
-      ]; // symbol operation cache
+    return new Promise((resolve) => {
+      interface TitleInfo {
+        line: number; // 标题行号
+        level: number; // 0 = H1
+        mark: string; // 标题下划线标记
+        text: string; // 标题文本
+      }
 
-      let markRegistry: Array<String> = []; // storage for marks in order.
-      let tid: number = 0;
+      // ---- 第一遍：收集所有标题及其层级 ----
+      const titles: TitleInfo[] = [];
+      const markRegistry: string[] = [];
 
-      let i: number = 0;
+      let i = 0;
       while (i < document.lineCount - 1) {
-        let info = this.titleEval(document, i);
-        let titleLevel = markRegistry.indexOf(info["mark"]);
-
-        if (info["isTitle"] === true) {
-          if (titleLevel === -1) {
-            markRegistry.push(info["mark"]);
+        const info = this.titleEval(document, i);
+        if (info.isTitle) {
+          let level = markRegistry.indexOf(info.mark);
+          if (level === -1) {
+            markRegistry.push(info.mark);
+            level = markRegistry.indexOf(info.mark);
           }
-          titleLevel = markRegistry.indexOf(info["mark"]);
+          titles.push({
+            line: info.line!.lineNumber,
+            level,
+            mark: info.mark,
+            text: info.line!.text,
+          });
+        }
+        i += info.jump;
+      }
 
-          let line = info["line"];
-          let smb = new vscode.DocumentSymbol(
-            line.text,
-            "H" + String(titleLevel + 1),
-            vscode.SymbolKind.Field, // determines the outline-item icon
-            line.range,
-            line.range
-          );
+      // ---- 第二遍：算出每个标题的章节范围，再组装嵌套 ----
+      const symbols: vscode.DocumentSymbol[] = [];
+      const stack: { level: number; children: vscode.DocumentSymbol[] }[] = [];
 
-          for (
-            let j = nodes.length - 1;
-            j >= 0;
-            j-- // reversed-direction scan to proof unconventional header orders.
-          ) {
-            if (nodes[j][1] > titleLevel) {
-              nodes.pop();
-            } else {
-              nodes[nodes.length - 1][0].push(smb);
-              nodes.push([smb.children, titleLevel + 1]);
-              break;
-            }
+      for (let t = 0; t < titles.length; t++) {
+        const cur = titles[t];
+
+        // 章节结束行：同级或更浅（更高级）标题的所在行；若无则到文档末尾
+        let endLine = document.lineCount;
+        for (let k = t + 1; k < titles.length; k++) {
+          if (titles[k].level <= cur.level) {
+            endLine = titles[k].line;
+            break;
           }
         }
-        i = i + info["jump"];
+
+        const titleLine = document.lineAt(cur.line);
+        const smb = new vscode.DocumentSymbol(
+          cur.text,
+          "H" + (cur.level + 1),
+          vscode.SymbolKind.Field, // determines the outline-item icon
+          new vscode.Range(cur.line, 0, endLine, 0), // range = 整个章节（反向定位依赖它）
+          titleLine.range // selectionRange = 标题行（正向跳转依赖它）
+        );
+
+        // 弹出比当前标题更深的栈顶，挂到最近的更浅/同级标题之下
+        while (stack.length && stack[stack.length - 1].level >= cur.level) {
+          stack.pop();
+        }
+        if (stack.length) {
+          stack[stack.length - 1].children.push(smb);
+        } else {
+          symbols.push(smb);
+        }
+        stack.push({ level: cur.level, children: smb.children });
       }
-      console.log(markRegistry);
+
+      console.log(
+        "[rst-lim] provider called:",
+        document.languageId,
+        document.fileName,
+        "symbols=" + symbols.length,
+        "titles=" + titles.length
+      );
       resolve(symbols);
     });
   }
